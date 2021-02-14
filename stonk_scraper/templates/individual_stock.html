@@ -1,0 +1,47 @@
+<html>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <script src="/static/js/getStocks.js"></script>
+  <head>
+    <title>Stonk Scraper</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container" id="start">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-header">
+                Stonk Scraper
+                <a href= "/">Home</a>
+                <a href="/individual_stocks">Individual Stocks</a> 
+                <a href="/">Github</a>
+            </div>   
+                Look Up individual stock ticker mentions            
+            </div>  
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <input type="text" id="InputBox" placeholder="Enter stock ticker EX. APPL"> <button onclick="getIndividualTicker()">Enter</button>
+            </div>      
+            <div class="card-body" id="Stock Results">
+             WEEEEEE             
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container" id="end">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-header">Disclaimer </div>                        
+              <div class="card-body">
+                <div class="text-center" style="margin-bottom: 10px;">
+                  This is not financial advice. I am not offering advice. I in no way represent you.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>

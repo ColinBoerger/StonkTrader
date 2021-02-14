@@ -1,0 +1,55 @@
+<html>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <script src="/static/js/getStocks.js"></script>
+  <head>
+    <title>Stonk Scraper</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container" id="start">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-header">
+                Stonk Scraper
+                <a href= "/">Home</a>
+                <a href="/individual_stocks">Individual Stocks</a> 
+                <a href="/">Github</a>
+            </div>   
+                Look at individual Subreddit            
+            </div>  
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+                <script type="text/javascript"> 
+                    //TODO fetch all the subreddits that I scrape data from!
+
+                </script>
+             <select>
+                <option value="0">Select car:</option>
+                <option value="1">Audi</option>
+            </select>
+             <button onclick="getIndividualTicker()">Enter</button>
+            </div>      
+            <div class="card-body" id="Stock Results">
+             WEEEEEE             
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container" id="end">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-header">Disclaimer </div>                        
+              <div class="card-body">
+                <div class="text-center" style="margin-bottom: 10px;">
+                  This is not financial advice. I am not offering advice. I in no way represent you.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Stonk Scraper</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container" id="start">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-header">
+                Stonk Scraper
+                <a href= "/">Home</a>
+                <a href="/individual_stocks">Individual Stocks</a>
+                <a href="/custom_searches">Custom Searches</a>
+                <a href="/">Github</a>
+            </div>   
+            <h1>Purpose</h1>
+            <p>This website is designed to let people know the top stocks that are being mentioned on reddit. It is a tool designed to make this data easily accessible to everyone who is interested and not just people with the resources to skim reddit everyday. This code is open source </p>
+            <h2>Methodology</h2>
+            <p>I look at the hot posts on reddit and look through the post and comments for stock tickers. Certain tickers have been removed because they are too common in everyday language. See the github for the list of excluded tickers</p>
+        </div>  
+        <div class="col-md-8">
+          <div class="card">
+                                 
+            <div class="card-body">
+              
+              <p>The top mentioned stock tickers from various investing subreddits:</p>
+               <ol>
+              {% for ticker in stocks %}
+                   
+                        <li>{{ticker[0]}} mentions {{ticker[1]}}</li>
+                    
+              {% endfor %}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container" id="end">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-header">Disclaimer </div>                        
+              <div class="card-body">
+                <div class="text-center" style="margin-bottom: 10px;">
+                  This is not financial advice. I am not offering advice. I in no way represent you.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>
