@@ -1,6 +1,7 @@
 <html>
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <script src="/static/js/getStocks.js"></script>
+  <script src="/static/js/getSubData.js"></script>
+<body onload="getSupportedSubs();">
   <head>
     <title>Stonk Scraper</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -24,14 +25,13 @@
                     //TODO fetch all the subreddits that I scrape data from!
 
                 </script>
-             <select>
-                <option value="0">Select car:</option>
-                <option value="1">Audi</option>
+             <select id="selectBar">
+                <option value="0">Select SubReddit:</option>
             </select>
-             <button onclick="getIndividualTicker()">Enter</button>
+             <button onclick="getSubData()">Enter</button>
             </div>      
             <div class="card-body" id="Stock Results">
-             WEEEEEE             
+             Choose a subreddit         
             </div>
           </div>
         </div>

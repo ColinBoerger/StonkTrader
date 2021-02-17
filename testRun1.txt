@@ -1,0 +1,33 @@
+Time for run: 
+9.696644020080566
+Done
+Time for run: 
+18.038028120994568
+Done
+Time for run: 
+18.085667896270753
+Done
+Time for run: 
+18.185501062870024
+Done
+Time for run: 
+17.876350645224253
+Done
+Time for run: 
+18.138452688852947
+Done
+Time for run: 
+17.937504569689434
+Done
+Time for run: 
+18.13608269294103
+Done
+Time for run: 
+18.275294895966848
+Done
+Time for run: 
+18.144408396879832
+Done
+Time for run: 
+18.206163664658863
+Done
