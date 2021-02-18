@@ -16,6 +16,7 @@ function getSupportedSubs(){
 
 
 function getSubData(){
+	//Use clearbit.com/logo to get company logos
 	var e = document.getElementById("selectBar");
 	var strSub = e.value;
 	console.log(strSub)
@@ -27,11 +28,12 @@ function getSubData(){
 						document.getElementById("Stock Results").innerHTML = "No results";
 						return;
 					}
+
 					document.getElementById("Stock Results").innerHTML = "";
 					for(let i = 0; i < subs.length; i++){
 						document.getElementById("Stock Results").innerHTML = 
 							document.getElementById("Stock Results").innerHTML + "<br>" + (i+1)
-							+ ". " + subs[i][0] + " " + subs[i][1];
+							+ ". " + subs[i][0] + " " + subs[i][1] + " " + subs[i][2];
 					}
 					console.log(document.getElementById("Stock Results").innerHTML);
 				})

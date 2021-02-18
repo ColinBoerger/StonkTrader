@@ -165,7 +165,7 @@ def streamOfResults(listOfSubreddits, timeInSeconds):
 def main_test_stream():
     timeStart = time.time()
     timeBobba = time.time()
-    submissions_by_sub = streamOfResults(stock_subs, 10)
+    submissions_by_sub = streamOfResults(stock_subs, 1800)
     symbols = getTickers("tickers.csv")
     multiSubSymbols = {}
     for sub in submissions_by_sub.keys():

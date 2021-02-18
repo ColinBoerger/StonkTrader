@@ -7,7 +7,8 @@ function getIndividualTicker(){
 	let promise = fetch("stock/" + ticker)
 	promise.then(response => {
 			response.json().then(data =>{
-				document.getElementById("Stock Results").innerHTML = ticker + ": "	+ data[ticker];		
+				document.getElementById("Stock Results").innerHTML = data["name"] + "<br>" 
+				document.getElementById("Stock Results").innerHTML += ticker + ": "	+ data[ticker];		
 			})
 		}
 

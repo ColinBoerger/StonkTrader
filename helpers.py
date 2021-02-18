@@ -2,6 +2,9 @@ global stock_data
 global stock_lookup
 global time_at_last_update
 global stream_data
+global names
+
+names = {}
 
 stock_data = []
 
