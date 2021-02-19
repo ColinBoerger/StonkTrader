@@ -15,36 +15,34 @@
                 <a href="/custom_searches">Custom Searches</a>
                 <a href="/">Github</a>
             </div>   
-            <h1>Purpose</h1>
-            <p>This website is designed to let people know the top stocks that are being mentioned on reddit. It is a tool designed to make this data easily accessible to everyone who is interested and not just people with the resources to skim reddit everyday. This code is open source </p>
-            <h2>Methodology</h2>
-            <p>I look at the hot posts on reddit and look through the post and comments for stock tickers. Certain tickers have been removed because they are too common in everyday language. See the github for the list of excluded tickers</p>
+            <h1>Download the raw data</h1>
+
+            
         </div>  
         <div class="col-md-8">
           <div class="card">
                                  
             <div class="card-body">
-              
-              <p>The top mentioned stock tickers from various investing subreddits from hot posts:</p>
-               <ol>
-              {% for ticker in stocks_hot %}
-                   
-                        <li>{{ticker[0]}} mentions {{ticker[1]}}</li>
-                    
-              {% endfor %}
-              </ol>
+              Interested in downloading the raw data that powers this website? Click the button below to get a zip file that contains all the data collected up to the moment of downloading.               
             </div>
+          </div>
+          <div class="card">
             <div class="card-body">
-              
-              <p>The top mentioned stock tickers from various investing subreddits from top posts:</p>
-               <ol>
-              {% for ticker in stocks_top %}
-                   
-                        <li>{{ticker[0]}} mentions {{ticker[1]}}</li>
-                    
-              {% endfor %}
-              </ol>
-            </div>
+              File Structure:
+              |
+              |-hot
+              | |-subreddits
+              |-top
+              | |-subreddits
+              |-streamData
+              | |-Wallstreetbets
+              | |-blaa 
+              | |-blah
+
+            hot: Contains numbers from posts in the "hot" catagory. "subreddits" contains the data split into subreddits.
+            top: Contains numbers from posts in the "top" catagory. "subreddits" contains the data split into subreddits.
+            streamData: Contains numbers from the comment stream from subreddits broken up into folder by the subreddit.
+            </div>            
           </div>
         </div>
       </div>

@@ -2,28 +2,53 @@ import flask
 import stonk_scraper
 import os
 import csv
-from helpers import stock_lookup, names, stream_data
+from helpers import *
+
+@stonk_scraper.app.route("/stock/<ticker>/subs/")
+def api_stock_subs(ticker, method='GET'):
+	global stock_lookup_subs
+	to_ret = {}
+	to_ret["hot"] = []
+	to_ret["top"] = [] 
+	ticker = ticker.upper()
+	for sub in stock_lookup_subs["top"]:
+		mentions = 0
+		if ticker in stock_lookup_subs["top"][sub].keys():
+			mentions = stock_lookup_subs["top"][sub][ticker]
+		to_ret["top"] += [[sub, str(mentions)]]
+	for sub in stock_lookup_subs["hot"]:
+		mentions = 0
+		if ticker in stock_lookup_subs["hot"][sub].keys():
+			mentions = stock_lookup_subs["hot"][sub][ticker]
+		to_ret["hot"] += [[sub, str(mentions)]]
+
+	return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/stock/<ticker>")
 def api_stock(ticker, method='GET'):
-	global stock_lookup
+	global stock_lookup_hot
+	global stock_lookup_top
 	global names
 	if len(names.keys()) < 1:
 		getNames("tickers.csv")
 	to_ret = {}
 	ticker = ticker.upper()
-	if ticker in stock_lookup.keys():
-		to_ret[ticker] = stock_lookup[ticker]
+	if ticker in stock_lookup_hot.keys():
+		to_ret[ticker + "hot"] = stock_lookup_hot[ticker]
 		to_ret["name"] = names[ticker]
 
 	else: 
 		#print(names)
-		print(stock_lookup)
-		to_ret[ticker] = 0
+		print(stock_lookup_hot)
+		to_ret[ticker + "hot"] = 0
 		if ticker in names.keys():
 			to_ret["name"] = names[ticker]
 		else:
 			to_ret["name"] = "No name known"
+	if ticker in stock_lookup_top.keys():
+		to_ret[ticker + "top"] = stock_lookup_top[ticker]
+	else: 
+		to_ret[ticker + "top"] = 0
 	return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/stock/supportedSubs/")
@@ -41,11 +66,6 @@ def api_sub_data(subName, method='GET'):
 		getNames("tickers.csv")
 	#global stock_lookup
 
-	try:
-		files = os.listdir("stonk_scraper/static/stock_data/streamData/" + subName)
-	except Exception as e:
-		to_ret = {}
-		to_ret["Error"] = "Unsuppotred sub reddit" 
 	data = []
 	if len(stream_data[subName]) > 10:
 		data = stream_data[subName][0:10]
@@ -59,6 +79,16 @@ def api_sub_data(subName, method='GET'):
 	print(data)
 	
 	return flask.jsonify(to_ret)
+
+@stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>")
+def api_sub_time_data(subName,timeInSeconds, method='GET'):
+	#TODO: Finish this function
+	try:
+		files = os.listdir("stonk_scraper/static/stock_data/streamData/" + subName)
+	except Exception as e:
+		to_ret = {}
+		to_ret["Error"] = "Unsuppotred sub reddit" 
+
 
 def getNames(csvFileName):
     global names

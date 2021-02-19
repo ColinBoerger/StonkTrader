@@ -2,9 +2,10 @@ import praw
 import csv
 import time
 import os
-
+from multiprocessing import Process
 #Uses a praw.ini file
-reddit = praw.Reddit("bot1", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)")
+reddit1 = praw.Reddit("bot1", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)")
+reddit2 = praw.Reddit("bot2", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)")
 
 #https://query1.finance.yahoo.com/v7/finance/chart/SPY
 
@@ -12,7 +13,6 @@ reddit = praw.Reddit("bot1", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)")
 #memestonktraders
 '''
 
-TODO: Change the file saving format to eliminate the 0s. It can be an implied ticker to cut down on storage space
 
 
 '''
@@ -24,6 +24,7 @@ stock_subs = ["wallstreetbets","Stocks", "Stock_picks", "StockMarket", "investin
 
 def getTickers(csvFileName):
     tickers = []
+    names = []
     with open(csvFileName) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
@@ -39,7 +40,7 @@ def generateSubmissionsHot(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit.subreddit(sub).hot()
+        posts = reddit2.subreddit(sub).hot()
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -54,11 +55,11 @@ def generateSubmissionsHot(listOfSubreddits):
                     continue
     return [toRet, toRetBySub]
 
-def generateSubmissionsTop(listOfSubreddits, timeFrame):
+def generateSubmissionsTop(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit.subreddit(sub).hot(timeFrame)
+        posts = reddit2.subreddit(sub).hot()
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -85,21 +86,20 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
             toRet += 1
     return toRet
 
-def saveResults(titles, symbols):
-    filename = "stonk_scraper/static/stock_data/" + str(time.time()).split(".")[0] + ".csv"
+def saveResults(titles, symbols, filePath):
+    filename = filePath + str(time.time()).split(".")[0] + ".csv"
     with open(filename, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(titles)
         csvwriter.writerows(symbols)
 
-def saveResultsMulti(titles, subSymbols):
-    filePath = "stonk_scraper/static/stock_data/subReddits/"
+def saveResultsMulti(titles, subSymbols, filePath):
     currTime = str(time.time()).split(".")[0]
     for sub in subSymbols.keys():
-        subs = os.listdir(filePath)
+        subs = os.listdir(filePath + "subreddits/")
         if sub not in subs:
-            os.mkdir(filePath + sub)
-        filename = filePath + sub + "/" + currTime + ".csv"
+            os.mkdir(filePath + "subreddits/" + sub)
+        filename = filePath + "subreddits/" + sub + "/" + currTime + ".csv"
         with open(filename, 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(titles)
@@ -135,17 +135,17 @@ def streamOfResults(listOfSubreddits, timeInSeconds):
         else:
             subReddits += listOfSubreddits[s]
     print(subReddits)
-    subreddit = reddit.subreddit(subReddits)
+    subreddit = reddit1.subreddit(subReddits)
     timeStart = time.time()
     while True:
         numRequests = 0
         for submission in subreddit.stream.submissions():
-            print("Here")
+            #print("Here")
             numRequests += 1
             subName = submission.subreddit.display_name.lower()
             toRetBySub[subName] += [submission.title]
             toRetBySub[subName] += [submission.selftext]
-            print(subName)
+            #print(subName)
             #time.sleep(.25)
             for comment in submission.comments.list():
                 try:
@@ -153,39 +153,39 @@ def streamOfResults(listOfSubreddits, timeInSeconds):
                 except AttributeError as e:
                     continue
         
-            print(time.time() - timeStart)
+            #print(time.time() - timeStart)
             if (time.time() - timeStart) > timeInSeconds:
                 return toRetBySub
 
             #Hacky way to stop it from pausing
             if numRequests > 50:
-                print("Broken")
+                #print("Broken")
                 break
 
 def main_test_stream():
-    timeStart = time.time()
-    timeBobba = time.time()
-    submissions_by_sub = streamOfResults(stock_subs, 1800)
     symbols = getTickers("tickers.csv")
-    multiSubSymbols = {}
-    for sub in submissions_by_sub.keys():
-        multiSubSymbols[sub] = []
+    print("Here")
+    while True:
+        submissions_by_sub = streamOfResults(stock_subs, 3600)
+        multiSubSymbols = {}
+        for sub in submissions_by_sub.keys():
+            multiSubSymbols[sub] = []
 
-    for i in range(0,len(symbols)):
-        for sub1 in submissions_by_sub.keys():
-            numInstances =  findInstancesNoDuplicates(symbols[i][0], submissions_by_sub[sub1])
-            if numInstances > 0:
-                multiSubSymbols[sub1] +=  [[symbols[i][0], numInstances]]
-    for sub2 in submissions_by_sub:
-        multiSubSymbols[sub2].sort(reverse=True,key=lambda a: a[1])
-        print(sub2)
+        for i in range(0,len(symbols)):
+            for sub1 in submissions_by_sub.keys():
+                numInstances =  findInstancesNoDuplicates(symbols[i][0], submissions_by_sub[sub1])
+                if numInstances > 0:
+                    multiSubSymbols[sub1] +=  [[symbols[i][0], numInstances]]
+        for sub2 in submissions_by_sub:
+            multiSubSymbols[sub2].sort(reverse=True,key=lambda a: a[1])
+            #print(sub2)
 
-        for entry in range(0,len(multiSubSymbols[sub2])):
-            if entry >= 10:
-                break
-            print(str(multiSubSymbols[sub2][entry][0]) + ":" + str(multiSubSymbols[sub2][entry][1]))
-    saveStreamData(["Ticker", "Instances"], multiSubSymbols)
-def main():
+            for entry in range(0,len(multiSubSymbols[sub2])):
+                if entry >= 10:
+                    break
+            #print(str(multiSubSymbols[sub2][entry][0]) + ":" + str(multiSubSymbols[sub2][entry][1]))
+        saveStreamData(["Ticker", "Instances"], multiSubSymbols)
+def main_get_results():
     timeStart = time.time()
     timeBobba = time.time()
     symbols = getTickers("tickers.csv")
@@ -209,17 +209,42 @@ def main():
         for sub in submissions_by_sub:
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
-        saveResults(["Ticker", "NumApps"], symbols)
-        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols)
+        saveResults(["Ticker", "NumApps"], symbols, "stonk_scraper/static/stock_data/hot/")
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/hot/")
+
+        multiSubSymbols = {}
+        results = generateSubmissionsTop(stock_subs)
+        submissions_total = results[0]
+        submissions_by_sub = results[1]
+        for sub in submissions_by_sub.keys():
+            multiSubSymbols[sub] = []
+
+        for i in range(0,len(symbols)):
+            symbols[i][1] = findInstancesNoDuplicates(symbols[i][0], submissions_total)
+            for sub in submissions_by_sub.keys():
+                numInstances = findInstancesNoDuplicates(symbols[i][0], submissions_by_sub[sub])
+                if numInstances > 0:
+                    multiSubSymbols[sub] +=  [[symbols[i][0], numInstances]]
+
+        symbols.sort(reverse=True,key=lambda a: a[1])
+        for sub in submissions_by_sub:
+            multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
+
+        saveResults(["Ticker", "NumApps"], symbols, "stonk_scraper/static/stock_data/top/")
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/top/")
+
         timeEnd = time.time()
 
-        print("Time for run: ")
-        print(str((timeEnd-timeStart)/60))
+        #print("Time for run: ")
+        #print(str((timeEnd-timeStart)/60))
         
         timeStart = timeEnd
-        print("Done")
-        if (time.time() - timeBobba) > (3600*3):
-            return
-        time.sleep(500)
-
-main_test_stream()
+        print("Recheck results")
+        #if (time.time() - timeBobba) > (3600*3):
+         #   print("Ended")
+         #   exit()
+        time.sleep(3600*4)
+print("start")
+p = Process(target=main_test_stream, args=())
+p.start()
+main_get_results()

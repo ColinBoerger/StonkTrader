@@ -17,10 +17,11 @@
                 <a href="/custom_searches">Custom Searches</a>
                 <a href="/">Github</a>
             </div>   
-                Look at individual Subreddit            
+                <h1>Make custom queries into our data</h1> 
             </div>  
-        <div class="col-md-8">
+        <div class="col-md-8">  
           <div class="card">
+             <h4>Individual Subbreddit data from comments from the last hour:</h4> <h4>(XX minutes ago)</h4>
             <div class="card-body">
                 <script type="text/javascript"> 
                     //TODO fetch all the subreddits that I scrape data from!
@@ -29,7 +30,7 @@
              <select id="selectBar">
                 <option value="0">Select SubReddit:</option>
             </select>
-             <button onclick="getSubData()">Enter</button>
+             <button onclick="getSubData();getTickerSubData();">Enter</button>
             </div>      
             <div class="card-body" id="Stock Results">
              Choose a subreddit         
