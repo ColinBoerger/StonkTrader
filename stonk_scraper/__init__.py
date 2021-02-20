@@ -17,3 +17,4 @@ app.config.from_object('stonk_scraper.config')
 app.config.from_envvar('STONK_SCRAPER_SETTINGS', silent=True)
 # Tell the app about our server-side functions.
 import stonk_scraper.views
+import stonk_scraper.model 

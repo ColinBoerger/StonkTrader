@@ -14,6 +14,15 @@ function getSupportedSubs(){
 
 }
 
+function getLastUpdate(){
+	let promise = fetch("/lastUpdate")
+		promise.then(response => {
+				response.json().then(data =>{
+					document.getElementById("Time Since").innerHTML = "(" + data["timeInMinutes"] +" minutes ago)";
+				})
+			}
+		)
+}
 
 function getSubData(){
 	//Use clearbit.com/logo to get company logos

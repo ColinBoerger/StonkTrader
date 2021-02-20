@@ -8,23 +8,22 @@ import csv
 import os
 import time
 from helpers import * 
-'''
-global stock_data
-global stock_lookup
-global time_at_last_update
-
-stock_data = []
-
-stock_lookup = {}
-
-time_at_last_update = 0  
-'''
 
 @stonk_scraper.app.route('/', methods=['GET', 'POST'])
 def show_index():
     global stock_data_hot
     global stock_data_top
-    load_data()
+    global time_at_last_update
+    database = stonk_scraper.model.get_db()
+    cursor = database.cursor()
+    res = cursor.execute("SELECT * from stocks").fetchall()
+    print(res)
+
+    if time.time() - time_at_last_update > (15):      
+        load_data()
+        time_at_last_update = time.time()
+        print("Time:")
+        print(time_at_last_update)
     to_show_hot = stock_data_hot[0:10]
     to_show_top = stock_data_top[0:10]
     context = {}
@@ -34,21 +33,36 @@ def show_index():
 
 @stonk_scraper.app.route('/individual_stocks', methods=['GET', 'POST'])
 def show_individual_stocks():
+    global time_at_last_update
 
-    #TODO show the stock trending overtime
-    load_data()
+    if time.time() - time_at_last_update > (15):
+        print("Updating")      
+        load_data()
+        time_at_last_update = time.time()
+    print("Time" + str(time_at_last_update))
     context = {}
     return flask.render_template("individual_stock.html", **context)
 
 @stonk_scraper.app.route('/custom_searches', methods=['GET', 'POST'])
 def show_custom_searches():
+    global time_at_last_update
 
-    #TODO show the stock trending overtime
-    load_data()
+    if time.time() - time_at_last_update > (15):      
+        load_data()
+        time_at_last_update = time.time()
     context = {}
     return flask.render_template("custom_searches.html", **context)
 
 
+@stonk_scraper.app.route('/stock/<ticker>/page', methods=['GET'])
+def show_stock_page():
+    global time_at_last_update
+    if time.time() - time_at_last_update > (15):      
+        load_data()
+        time_at_last_update = time.time()
+    return "Implement me"
+
+#@TODO make it upload to a database
 def load_stock_data_sub():
     global stock_lookup_subs
 
@@ -107,9 +121,7 @@ def load_stock_data_sub():
 def load_stream_data():
     global stream_data
     global stock_lookup
-    global time_at_last_update
-    
-    time_at_last_update = time.time()
+
     folders = os.listdir("stonk_scraper/static/stock_data/streamData/")
     for folder in folders:
         files = os.listdir("stonk_scraper/static/stock_data/streamData/" + folder)
@@ -137,12 +149,8 @@ def load_stream_data():
         stream_data[folder] = tickers
 
 def load_data():
-    global time_at_last_update
-
-    if time.time() - time_at_last_update < (60*15):
-        print("No change")
-        return
-    time_at_last_update = time.time()
+    
+    #print(time_at_last_update)
     load_stock_data_hot()
     load_stock_data_top()
     load_stream_data()
@@ -152,7 +160,6 @@ def load_data():
 def load_stock_data_hot():
     global stock_data_hot
     global stock_lookup_hot
-    global time_at_last_update
 
 
     files = os.listdir("stonk_scraper/static/stock_data/hot/")
@@ -184,7 +191,6 @@ def load_stock_data_hot():
 def load_stock_data_top():
     global stock_data_top
     global stock_lookup_top
-    global time_at_last_update
 
 
     files = os.listdir("stonk_scraper/static/stock_data/top/")

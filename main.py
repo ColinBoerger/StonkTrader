@@ -2,6 +2,7 @@ import praw
 import csv
 import time
 import os
+import sqlite3
 from multiprocessing import Process
 #Uses a praw.ini file
 reddit1 = praw.Reddit("bot1", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)")
@@ -16,15 +17,28 @@ reddit2 = praw.Reddit("bot2", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)"
 
 
 '''
-
 wsb_only = ["wallstreetbets"]
 
 stock_subs = ["wallstreetbets","Stocks", "Stock_picks", "StockMarket", "investing", "dividends"]
 
 
 def getTickers(csvFileName):
+    
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    print("Opened database successfully")
+    #@TODO Insert all information into the 
     tickers = []
     names = []
+    c.execute("Select * from stocks")
+    res = c.fetchall()
+    if len(res) > 0:
+        for row in res:
+            tickers += [[row[0], 0]]
+        
+        conn.commit()
+        conn.close()
+        return tickers
     with open(csvFileName) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
@@ -34,6 +48,10 @@ def getTickers(csvFileName):
                 continue
             line_count += 1
             tickers += [[row[0], 0]]
+            names += [(row[0], row[1])]
+        c.executemany('INSERT INTO stocks VALUES (?,?)',names)
+    conn.commit()
+    conn.close()
     return tickers
 
 def generateSubmissionsHot(listOfSubreddits):
@@ -87,15 +105,40 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
     return toRet
 
 def saveResults(titles, symbols, filePath):
+    conn = sqlite3.connect('test.db')
+    print("Opened database successfully")
+    c = conn.cursor()
+    c.execute("INSERT INTO scans(type) VALUES (?)", ["ALL"])
+    c = conn.cursor()
+    c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
+    currScan = c.fetchone()
     filename = filePath + str(time.time()).split(".")[0] + ".csv"
     with open(filename, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(titles)
         csvwriter.writerows(symbols)
+    toWrite = []
+    for sys in symbols:
+        entry = (sys[0], sys[1],currScan[0])
+        toWrite += [entry]
+    c.executemany("INSERT INTO mentions VALUES (?,?,NULL,?)", toWrite)
 
 def saveResultsMulti(titles, subSymbols, filePath):
+    conn = sqlite3.connect('test.db')
+    print("Opened database successfully")
     currTime = str(time.time()).split(".")[0]
+    c = conn.cursor()
+    c.execute("INSERT INTO scans(type) VALUES (?)", ["MULTI"])
+    conn.commit()
+    c = conn.cursor()
+
+    c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
+    currScan = c.fetchone()
+    toWrite = []
     for sub in subSymbols.keys():
+        for row in subSymbols[sub]:
+            entry = (row[0],row[1],sub,currScan[0])
+            toWrite += [entry]
         subs = os.listdir(filePath + "subreddits/")
         if sub not in subs:
             os.mkdir(filePath + "subreddits/" + sub)
@@ -104,11 +147,26 @@ def saveResultsMulti(titles, subSymbols, filePath):
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(titles)
             csvwriter.writerows(subSymbols[sub])
-
+    c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
+    conn.commit()
+    conn.close()
 def saveStreamData(titles, subSymbols):
+    conn = sqlite3.connect('test.db')
+    print("Opened database successfully")
+    c = conn.cursor()
+    c.execute("INSERT INTO scans(type) VALUES (?)", ["STREAM"])
+    conn.commit()
+    c = conn.cursor()
+
+    c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
+    currScan = c.fetchone()
+    toWrite = []
     filePath = "stonk_scraper/static/stock_data/streamData/"
     currTime = str(time.time()).split(".")[0]
     for sub in subSymbols.keys():
+        for row in subSymbols[sub]:
+            entry = (row[0],row[1],sub,currScan[0])
+            toWrite += [entry]
         subs = os.listdir(filePath)
         if sub not in subs:
             os.mkdir(filePath + sub)
@@ -117,6 +175,7 @@ def saveStreamData(titles, subSymbols):
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(titles)
             csvwriter.writerows(subSymbols[sub])
+    c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
 
 def getResultsDaily(listOfSubreddits):
     print("Implement me")
@@ -211,7 +270,7 @@ def main_get_results():
 
         saveResults(["Ticker", "NumApps"], symbols, "stonk_scraper/static/stock_data/hot/")
         saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/hot/")
-
+#TODO: Break this up into another function that runs concurrently
         multiSubSymbols = {}
         results = generateSubmissionsTop(stock_subs)
         submissions_total = results[0]

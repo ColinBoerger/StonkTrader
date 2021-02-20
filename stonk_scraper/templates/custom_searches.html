@@ -1,7 +1,7 @@
 <html>
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <script src="/static/js/getSubData.js"></script>
-<body onload="getSupportedSubs();">
+<body onload="getSupportedSubs();getLastUpdate();">
   <head>
     <title>Stonk Scraper</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -21,7 +21,8 @@
             </div>  
         <div class="col-md-8">  
           <div class="card">
-             <h4>Individual Subbreddit data from comments from the last hour:</h4> <h4>(XX minutes ago)</h4>
+
+             <h4>Individual Subbreddit data from comments from the last hour:</h4> <div id="Time Since"><h4>(XX minutes ago)</h4></div>
             <div class="card-body">
                 <script type="text/javascript"> 
                     //TODO fetch all the subreddits that I scrape data from!
@@ -30,10 +31,24 @@
              <select id="selectBar">
                 <option value="0">Select SubReddit:</option>
             </select>
-             <button onclick="getSubData();getTickerSubData();">Enter</button>
+             <button onclick="getSubData();">Enter</button>
             </div>      
             <div class="card-body" id="Stock Results">
              Choose a subreddit         
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-8">  
+          <div class="card">
+
+             <h4>Trend of a ticker over time(Top):</h4> // <div id="Time Since"><h4>(XX minutes ago)</h4></div>
+            <div class="card-body">
+                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="alert();">Enter</button>
+            </div>      
+            <div class="card-body" id="Stock Trend">
+             Choose a stock to look at overtime (Note)
+             //https://wp-dd.com/how-to-create-a-javascript-chart-with-chart-js/        
             </div>
           </div>
         </div>

@@ -2,11 +2,14 @@ import flask
 import stonk_scraper
 import os
 import csv
+import time
 from helpers import *
+
 
 @stonk_scraper.app.route("/stock/<ticker>/subs/")
 def api_stock_subs(ticker, method='GET'):
 	global stock_lookup_subs
+
 	to_ret = {}
 	to_ret["hot"] = []
 	to_ret["top"] = [] 
@@ -24,11 +27,26 @@ def api_stock_subs(ticker, method='GET'):
 
 	return flask.jsonify(to_ret)
 
+@stonk_scraper.app.route("/lastUpdate")
+def api_time_since_update(method="GET"):
+    global time_at_last_update
+    
+    if(time_at_last_update == 0):
+        print("PANICK")
+    print(time_at_last_update)
+    time_since = time.time() - time_at_last_update
+    print(time_since)
+    to_ret = {}
+
+    to_ret["timeInMinutes"] = int(time_since/60)
+    return flask.jsonify(to_ret)
+
 @stonk_scraper.app.route("/stock/<ticker>")
 def api_stock(ticker, method='GET'):
 	global stock_lookup_hot
 	global stock_lookup_top
 	global names
+
 	if len(names.keys()) < 1:
 		getNames("tickers.csv")
 	to_ret = {}
@@ -53,6 +71,9 @@ def api_stock(ticker, method='GET'):
 
 @stonk_scraper.app.route("/stock/supportedSubs/")
 def api_supported_subs(method='GET'):
+	global time_at_last_update
+	print("Time right before")
+	print(time_at_last_update)
 	files = os.listdir("stonk_scraper/static/stock_data/streamData")
 	to_ret = {}
 	to_ret["supportedSubs"] =  files
