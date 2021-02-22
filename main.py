@@ -104,11 +104,11 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
             toRet += 1
     return toRet
 
-def saveResults(titles, symbols, filePath):
+def saveResults(titles, symbols, hotOrTop, filePath):
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
     c = conn.cursor()
-    c.execute("INSERT INTO scans(type) VALUES (?)", ["ALL"])
+    c.execute("INSERT INTO scans(type) VALUES (?)", [hotOrTop])
     c = conn.cursor()
     c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
     currScan = c.fetchone()
@@ -122,6 +122,9 @@ def saveResults(titles, symbols, filePath):
         entry = (sys[0], sys[1],currScan[0])
         toWrite += [entry]
     c.executemany("INSERT INTO mentions VALUES (?,?,NULL,?)", toWrite)
+    print(hotOrTop + " Printed")
+    conn.commit()
+    conn.close()
 
 def saveResultsMulti(titles, subSymbols, filePath):
     conn = sqlite3.connect('test.db')
@@ -176,6 +179,8 @@ def saveStreamData(titles, subSymbols):
             csvwriter.writerow(titles)
             csvwriter.writerows(subSymbols[sub])
     c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
+    conn.commit()
+    conn.close()
 
 def getResultsDaily(listOfSubreddits):
     print("Implement me")
@@ -268,7 +273,7 @@ def main_get_results():
         for sub in submissions_by_sub:
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
-        saveResults(["Ticker", "NumApps"], symbols, "stonk_scraper/static/stock_data/hot/")
+        saveResults(["Ticker", "NumApps"], symbols,"HOT", "stonk_scraper/static/stock_data/hot/")
         saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/hot/")
 #TODO: Break this up into another function that runs concurrently
         multiSubSymbols = {}
@@ -289,7 +294,7 @@ def main_get_results():
         for sub in submissions_by_sub:
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
-        saveResults(["Ticker", "NumApps"], symbols, "stonk_scraper/static/stock_data/top/")
+        saveResults(["Ticker", "NumApps"], symbols, "TOP", "stonk_scraper/static/stock_data/top/")
         saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/top/")
 
         timeEnd = time.time()
@@ -302,7 +307,7 @@ def main_get_results():
         #if (time.time() - timeBobba) > (3600*3):
          #   print("Ended")
          #   exit()
-        time.sleep(3600*4)
+        #time.sleep(3600*4)
 print("start")
 p = Process(target=main_test_stream, args=())
 p.start()

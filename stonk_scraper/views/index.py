@@ -17,16 +17,27 @@ def show_index():
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
     res = cursor.execute("SELECT * from stocks").fetchall()
-    print(res)
+    #print(res)
 
     if time.time() - time_at_last_update > (15):      
         load_data()
         time_at_last_update = time.time()
         print("Time:")
         print(time_at_last_update)
-    to_show_hot = stock_data_hot[0:10]
-    to_show_top = stock_data_top[0:10]
+    cursor.execute("SELECT * from mentions where scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)",["HOT"])
+    #cursor.execute("Select * from scans ") #where type=? ORDER BY created DESC",["HOT"])
+    test = cursor.fetchall()
+    #print(test)
+    to_show_hot = test[0:10]
+    #to_show_hot = stock_data_hot[0:10]
+    
+    cursor.execute("SELECT * from mentions where scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)",["TOP"])
+    test = cursor.fetchall()
+    to_show_top = test[0:10] # stock_data_top[0:10]
     context = {}
+    for i in range(0,10):
+        to_show_hot[i] = [to_show_hot[i]["ticker"], to_show_hot[i]["numMentions"]]
+        to_show_top[i] = [to_show_top[i]["ticker"], to_show_top[i]["numMentions"]]
     context["stocks_hot"] = to_show_hot
     context["stocks_top"] = to_show_top
     return flask.render_template('index.html', **context)
