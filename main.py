@@ -56,7 +56,7 @@ def generateSubmissionsHot(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit2.subreddit(sub).hot(limit=10)
+        posts = reddit2.subreddit(sub).hot()
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -75,7 +75,7 @@ def generateSubmissionsTop(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit2.subreddit(sub).top(limit=10)
+        posts = reddit2.subreddit(sub).top()
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -102,7 +102,7 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
             toRet += 1
     return toRet
 
-def saveResults(titles, symbols, hotOrTop, filePath):
+def saveResults(titles, symbols, hotOrTop):
     #@TODO I think I can delete this code and for total I can just sum the subs
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
@@ -111,11 +111,7 @@ def saveResults(titles, symbols, hotOrTop, filePath):
     c = conn.cursor()
     c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
     currScan = c.fetchone()
-    filename = filePath + str(time.time()).split(".")[0] + ".csv"
-    with open(filename, 'w') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(titles)
-        csvwriter.writerows(symbols)
+
     toWrite = []
     for sys in symbols:
         entry = (sys[0], sys[1],currScan[0])
@@ -125,7 +121,7 @@ def saveResults(titles, symbols, hotOrTop, filePath):
     conn.commit()
     conn.close()
 
-def saveResultsMulti(titles, subSymbols,hotOrTop, filePath):
+def saveResultsMulti(titles, subSymbols,hotOrTop):
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
     currTime = str(time.time()).split(".")[0]
@@ -136,21 +132,12 @@ def saveResultsMulti(titles, subSymbols,hotOrTop, filePath):
 
     c.execute("SELECT scanID, created FROM scans where type=? ORDER BY created DESC limit 1", ["MULTI-"+hotOrTop])
     currScan = c.fetchone()
-    print("CurrScan: " + str(currScan))
     toWrite = []
     for sub in subSymbols.keys():
         for row in subSymbols[sub]:
             entry = (row[0],row[1],sub,currScan[0])
             toWrite += [entry]
-        subs = os.listdir(filePath + "subreddits/")
-        # if sub not in subs:
-        #     os.mkdir(filePath + "subreddits/" + sub)
-        filename = filePath + "subreddits/" + sub + "/" + currTime + ".csv"
-        with open(filename, 'w') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(titles)
-            csvwriter.writerows(subSymbols[sub])
-    #print(toWrite)
+
     c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
     conn.commit()
     conn.close()
@@ -172,20 +159,10 @@ def saveStreamData(titles, subSymbols):
         for row in subSymbols[sub]:
             entry = (row[0],row[1],sub,currScan[0])
             toWrite += [entry]
-        subs = os.listdir(filePath)
-        if sub not in subs:
-            os.mkdir(filePath + sub)
-        filename = filePath + sub + "/" + currTime + ".csv"
-        with open(filename, 'w') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(titles)
-            csvwriter.writerows(subSymbols[sub])
     c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
     conn.commit()
     conn.close()
 
-def getResultsDaily(listOfSubreddits):
-    print("Implement me")
 
 
 #Note I deleted the stocks DD CEO and ! because the amount of false positives
@@ -218,14 +195,10 @@ def streamOfResults(listOfSubreddits, timeInSeconds):
                     toRetBySub[subName] += [comment.body]
                 except AttributeError as e:
                     continue
-        
-            #print(time.time() - timeStart)
             if (time.time() - timeStart) > timeInSeconds:
                 return toRetBySub
-
             #Hacky way to stop it from pausing
             if numRequests > 50:
-                #print("Broken")
                 break
 
 def main_test_stream():
@@ -249,7 +222,6 @@ def main_test_stream():
             for entry in range(0,len(multiSubSymbols[sub2])):
                 if entry >= 10:
                     break
-            #print(str(multiSubSymbols[sub2][entry][0]) + ":" + str(multiSubSymbols[sub2][entry][1]))
         saveStreamData(["Ticker", "Instances"], multiSubSymbols)
 def main_get_results():
     timeStart = time.time()
@@ -275,9 +247,10 @@ def main_get_results():
         for sub in submissions_by_sub:
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
-        saveResults(["Ticker", "NumApps"], symbols,"HOT", "stonk_scraper/static/stock_data/hot/")
-        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols,"HOT", "stonk_scraper/static/stock_data/hot/")
-#TODO: Break this up into another function that runs concurrently
+        saveResults(["Ticker", "NumApps"], symbols,"HOT")
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols,"HOT")
+        
+        #TODO: Break this up into another function that runs concurrently
         print("HOT Saved")
         multiSubSymbols = {}
         results = generateSubmissionsTop(stock_subs)
@@ -297,21 +270,14 @@ def main_get_results():
         for sub in submissions_by_sub:
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
-        saveResults(["Ticker", "NumApps"], symbols, "TOP", "stonk_scraper/static/stock_data/top/")
-        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "TOP", "stonk_scraper/static/stock_data/top/")
+        saveResults(["Ticker", "NumApps"], symbols, "TOP")
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "TOP")
         print("TOP Saved")
         timeEnd = time.time()
-
-        #print("Time for run: ")
-        #print(str((timeEnd-timeStart)/60))
-        
         timeStart = timeEnd
         print("Recheck results")
-        #if (time.time() - timeBobba) > (3600*3):
-         #   print("Ended")
-         #   exit()
         #time.sleep(3600*4)
 print("start")
-#p = Process(target=main_test_stream, args=())
-#p.start()
+p = Process(target=main_test_stream, args=())
+p.start()
 main_get_results()
