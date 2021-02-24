@@ -4,7 +4,7 @@ import os
 import csv
 import time, calendar
 from helpers import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz 
   
 # get the standard UTC time  
@@ -17,21 +17,24 @@ def api_stock_subs(ticker, method='GET'):
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
     #@TODO add database
+    resHot = cursor.execute("SELECT * from mentions as m where m.ticker = ? and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "MULTI-HOT"])
+    #resHot = cursor.execute("SELECT scanId from scans where type=? ORDER BY created DESC limit 1", ["MULTI-HOT"])
+    #resHot = cursor.execute("SELECT * from mentions as m where m.ticker = ? and m.scan = ? ", [ticker, 272])
+    resHot = resHot.fetchall()
+    print(resHot)
 
+    cursor = database.cursor()
+    resTop = cursor.execute("SELECT * from mentions as m where m.ticker = ? and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "MULTI-TOP"])
+    resTop = resTop.fetchall()
+    print(resTop)
+    
     to_ret = {}
     to_ret["hot"] = []
     to_ret["top"] = [] 
-    ticker = ticker.upper()
-    for sub in stock_lookup_subs["top"]:
-        mentions = 0
-        if ticker in stock_lookup_subs["top"][sub].keys():
-            mentions = stock_lookup_subs["top"][sub][ticker]
-        to_ret["top"] += [[sub, str(mentions)]]
-    for sub in stock_lookup_subs["hot"]:
-        mentions = 0
-        if ticker in stock_lookup_subs["hot"][sub].keys():
-            mentions = stock_lookup_subs["hot"][sub][ticker]
-        to_ret["hot"] += [[sub, str(mentions)]]
+    for i in range(0, len(resHot)):
+        to_ret["hot"] += [[resHot[i]["subReddit"], resHot[i]["numMentions"]]]
+    for i in range(0, len(resTop)):
+        to_ret["top"] += [[resTop[i]["subReddit"], resTop[i]["numMentions"]]]
 
     return flask.jsonify(to_ret)
 
@@ -68,44 +71,37 @@ def api_stock(ticker, method='GET'):
     global stock_lookup_hot
     global stock_lookup_top
     global names
-
+    to_ret = {}
+    ticker = ticker.upper()
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
     #@TODO add database
-    if len(names.keys()) < 1:
-        getNames("tickers.csv")
-    to_ret = {}
-    ticker = ticker.upper()
-    if ticker in stock_lookup_hot.keys():
-        to_ret[ticker + "hot"] = stock_lookup_hot[ticker]
-        to_ret["name"] = names[ticker]
+    cursor.execute("SELECT m.numMentions, m.ticker, st.companyName from stocks as st, mentions as m where m.ticker = ? and m.ticker = st.ticker and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "HOT"])
+    res = cursor.fetchone()
+    print(res)
+    to_ret[ticker + "hot"] = res["numMentions"]
+    to_ret["name"] = res["companyName"]
+    cursor = database.cursor()
+    #@TODO add database
+    cursor.execute("SELECT m.numMentions, m.ticker, st.companyName from stocks as st, mentions as m where m.ticker = ? and m.ticker = st.ticker and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "TOP"])
+    res = cursor.fetchone()
+    to_ret[ticker + "top"] = res["numMentions"]
 
-    else: 
-        #print(names)
-        print(stock_lookup_hot)
-        to_ret[ticker + "hot"] = 0
-        if ticker in names.keys():
-            to_ret["name"] = names[ticker]
-        else:
-            to_ret["name"] = "No name known"
-    if ticker in stock_lookup_top.keys():
-        to_ret[ticker + "top"] = stock_lookup_top[ticker]
-    else: 
-        to_ret[ticker + "top"] = 0
     return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/stock/supportedSubs/")
 def api_supported_subs(method='GET'):
-    global time_at_last_update
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
     #@TODO add database
-    
-    print("Time right before")
-    print(time_at_last_update)
-    files = os.listdir("stonk_scraper/static/stock_data/streamData")
+    cursor.execute("SELECT DISTINCT subReddit from mentions")
+    res = cursor.fetchall()
     to_ret = {}
-    to_ret["supportedSubs"] =  files
+    subs = []
+    for r in res:
+        if r["subReddit"] != None:
+            subs += [r["subReddit"]]
+    to_ret["supportedSubs"] =  subs
     return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/subs/<subName>")
@@ -118,20 +114,13 @@ def api_sub_data(subName, method='GET'):
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
-    #global stock_lookup
+    
 
     res1 = cursor.execute("SELECT m.ticker, m.numMentions, s.companyName  from mentions as m, stocks as s  where s.ticker=m.ticker AND m.subReddit=? and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)",[subName, "STREAM"])
     res = res1.fetchall()
     
     data = res[0:10]
-    print(data)
-    '''
-    if len(stream_data[subName]) > 10:
-        data = stream_data[subName][0:10]
-    else:
-        data = stream_data[subName]
-    print(data)
-    '''
+
     for d in range(0, len(data)): 
         data[d] = [res[d]["ticker"], res[d]["numMentions"], res[d]["companyName"]]
     to_ret = {}
@@ -142,6 +131,22 @@ def api_sub_data(subName, method='GET'):
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>")
 def api_sub_time_data(subName,timeInSeconds, method='GET'):
     #TODO: Finish this function
+    UTC = pytz.utc 
+    time_offset_seconds = 0
+    try:
+        time_offset_seconds = int(timeInSeconds)
+    except Exception as e:
+        return "Finish Me"
+    curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
+    print(curr_time)
+
+    database = stonk_scraper.model.get_db()
+    cursor = database.cursor()
+    
+
+    res1 = cursor.execute("SELECT *  from scans  where created >= ?",[curr_time])
+    res = res1.fetchall()
+    print(res)
     return "FINISH ME"
 
 

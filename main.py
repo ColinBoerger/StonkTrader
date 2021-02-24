@@ -19,11 +19,10 @@ reddit2 = praw.Reddit("bot2", user_agent="pc:StonkScraper:v0.0.1 (by u/taseru2)"
 '''
 wsb_only = ["wallstreetbets"]
 
-stock_subs = ["wallstreetbets","Stocks", "Stock_picks", "StockMarket", "investing", "dividends"]
+stock_subs = ["wallstreetbets","stocks", "stock_picks", "stockmarket", "investing", "dividends"]
 
 
 def getTickers(csvFileName):
-    
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
     print("Opened database successfully")
@@ -35,7 +34,6 @@ def getTickers(csvFileName):
     if len(res) > 0:
         for row in res:
             tickers += [[row[0], 0]]
-        
         conn.commit()
         conn.close()
         return tickers
@@ -58,7 +56,7 @@ def generateSubmissionsHot(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit2.subreddit(sub).hot()
+        posts = reddit2.subreddit(sub).hot(limit=10)
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -77,7 +75,7 @@ def generateSubmissionsTop(listOfSubreddits):
     toRet = []
     toRetBySub = {}
     for sub in listOfSubreddits:
-        posts = reddit2.subreddit(sub).hot()
+        posts = reddit2.subreddit(sub).top(limit=10)
         toRetBySub[sub] = []
         for p in posts:
             toRet += [p.selftext]
@@ -105,6 +103,7 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
     return toRet
 
 def saveResults(titles, symbols, hotOrTop, filePath):
+    #@TODO I think I can delete this code and for total I can just sum the subs
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
     c = conn.cursor()
@@ -126,33 +125,36 @@ def saveResults(titles, symbols, hotOrTop, filePath):
     conn.commit()
     conn.close()
 
-def saveResultsMulti(titles, subSymbols, filePath):
+def saveResultsMulti(titles, subSymbols,hotOrTop, filePath):
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
     currTime = str(time.time()).split(".")[0]
     c = conn.cursor()
-    c.execute("INSERT INTO scans(type) VALUES (?)", ["MULTI"])
+    c.execute("INSERT INTO scans(type) VALUES (?)", ["MULTI-"+hotOrTop])
     conn.commit()
     c = conn.cursor()
 
-    c.execute("SELECT scanID, created FROM scans ORDER BY created DESC limit 1")
+    c.execute("SELECT scanID, created FROM scans where type=? ORDER BY created DESC limit 1", ["MULTI-"+hotOrTop])
     currScan = c.fetchone()
+    print("CurrScan: " + str(currScan))
     toWrite = []
     for sub in subSymbols.keys():
         for row in subSymbols[sub]:
             entry = (row[0],row[1],sub,currScan[0])
             toWrite += [entry]
         subs = os.listdir(filePath + "subreddits/")
-        if sub not in subs:
-            os.mkdir(filePath + "subreddits/" + sub)
+        # if sub not in subs:
+        #     os.mkdir(filePath + "subreddits/" + sub)
         filename = filePath + "subreddits/" + sub + "/" + currTime + ".csv"
         with open(filename, 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(titles)
             csvwriter.writerows(subSymbols[sub])
+    #print(toWrite)
     c.executemany("INSERT INTO mentions VALUES (?,?,?,?)", toWrite)
     conn.commit()
     conn.close()
+
 def saveStreamData(titles, subSymbols):
     conn = sqlite3.connect('test.db')
     print("Opened database successfully")
@@ -274,8 +276,9 @@ def main_get_results():
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
         saveResults(["Ticker", "NumApps"], symbols,"HOT", "stonk_scraper/static/stock_data/hot/")
-        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/hot/")
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols,"HOT", "stonk_scraper/static/stock_data/hot/")
 #TODO: Break this up into another function that runs concurrently
+        print("HOT Saved")
         multiSubSymbols = {}
         results = generateSubmissionsTop(stock_subs)
         submissions_total = results[0]
@@ -295,8 +298,8 @@ def main_get_results():
             multiSubSymbols[sub].sort(reverse=True,key=lambda a: a[1])
 
         saveResults(["Ticker", "NumApps"], symbols, "TOP", "stonk_scraper/static/stock_data/top/")
-        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "stonk_scraper/static/stock_data/top/")
-
+        saveResultsMulti(["Ticker", "NumApps"], multiSubSymbols, "TOP", "stonk_scraper/static/stock_data/top/")
+        print("TOP Saved")
         timeEnd = time.time()
 
         #print("Time for run: ")
@@ -309,6 +312,6 @@ def main_get_results():
          #   exit()
         #time.sleep(3600*4)
 print("start")
-p = Process(target=main_test_stream, args=())
-p.start()
+#p = Process(target=main_test_stream, args=())
+#p.start()
 main_get_results()
