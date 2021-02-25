@@ -33,13 +33,11 @@ def show_index():
 
 @stonk_scraper.app.route('/individual_stocks', methods=['GET', 'POST'])
 def show_individual_stocks():
-
     context = {}
     return flask.render_template("individual_stock.html", **context)
 
 @stonk_scraper.app.route('/custom_searches', methods=['GET', 'POST'])
 def show_custom_searches():
-
     context = {}
     return flask.render_template("custom_searches.html", **context)
 

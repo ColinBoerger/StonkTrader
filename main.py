@@ -23,14 +23,14 @@ stock_subs = ["wallstreetbets","stocks", "stock_picks", "stockmarket", "investin
 
 
 def getTickers(csvFileName):
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
     print("Opened database successfully")
     #@TODO Insert all information into the 
     tickers = []
     names = []
-    c.execute("Select * from stocks")
-    res = c.fetchall()
+    c1 = c.execute("Select * from stocks")
+    res = c1.fetchall()
     if len(res) > 0:
         for row in res:
             tickers += [[row[0], 0]]
@@ -104,7 +104,7 @@ def findInstancesNoDuplicates(ticker, listOfSubmissions):
 
 def saveResults(titles, symbols, hotOrTop):
     #@TODO I think I can delete this code and for total I can just sum the subs
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('test1.db')
     print("Opened database successfully")
     c = conn.cursor()
     c.execute("INSERT INTO scans(type) VALUES (?)", [hotOrTop])
@@ -122,7 +122,7 @@ def saveResults(titles, symbols, hotOrTop):
     conn.close()
 
 def saveResultsMulti(titles, subSymbols,hotOrTop):
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('test1.db')
     print("Opened database successfully")
     currTime = str(time.time()).split(".")[0]
     c = conn.cursor()
@@ -143,7 +143,7 @@ def saveResultsMulti(titles, subSymbols,hotOrTop):
     conn.close()
 
 def saveStreamData(titles, subSymbols):
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('test1.db')
     print("Opened database successfully")
     c = conn.cursor()
     c.execute("INSERT INTO scans(type) VALUES (?)", ["STREAM"])
@@ -280,4 +280,5 @@ def main_get_results():
 print("start")
 p = Process(target=main_test_stream, args=())
 p.start()
+time.sleep(10)
 main_get_results()

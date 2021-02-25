@@ -58,6 +58,9 @@ def api_time_since_update(method="GET"):
 
 @stonk_scraper.app.route("/stock/<ticker>")
 def api_stock(ticker, method='GET'):
+    '''
+        Potentially use import yfinance to get information on stocks
+    '''
     to_ret = {}
     ticker = ticker.upper()
     
@@ -96,7 +99,7 @@ def api_stock_time(ticker, timeInSeconds, method='GET'):
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
-    cursor.execute("SELECT m.numMentions, m.scan, s.created from mentions as m, scans as s where m.ticker = ? and m.scan = s.scanId and m.scan in (Select scanId from scans where type=? and created >= ?) ORDER by m.scan DESC", [ticker, "TOP",curr_time])
+    cursor.execute("SELECT m.numMentions, m.scan, s.created from mentions as m, scans as s where m.ticker = ? and m.scan = s.scanId and m.scan in (Select scanId from scans where type=? and created >= ?) ORDER by m.scan", [ticker, "TOP",curr_time])
     res = cursor.fetchall()
     print(res)
     if res == None:

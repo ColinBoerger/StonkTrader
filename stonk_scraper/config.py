@@ -15,7 +15,7 @@ SECRET_KEY = b'FIXME SET THIS WITH: $ python3 -c "import os; print(os.urandom(24
 
 SESSION_COOKIE_NAME = 'login'
 
-DATABASE_FILENAME = 'test.db'
+DATABASE_FILENAME = 'test1.db'
 '''os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
     'var', 'stonk_scraper.sqlite3'

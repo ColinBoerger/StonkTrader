@@ -46,16 +46,13 @@
         <div class="col-md-8">  
           <div class="card">
 
-             <h4>Trend of a ticker over time(Top):</h4> // <div id="Time Since"><h4>(XX minutes ago)</h4></div>
+             <h4>Trend of a ticker over time(Top):</h4><div id="Time Since1"><h4>(XX minutes ago)</h4></div>
             <div class="card-body">
                 <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="getTickerOverTime();">Enter</button>
             </div>      
             <div class="card-body" id="Stock Trend">
-              <div class="container">
-                <canvas id="myChart" width="600" height="400"></canvas>
-              </div>
-             Choose a stock to look at overtime (Note)
-             //https://wp-dd.com/how-to-create-a-javascript-chart-with-chart-js/        
+              
+                <canvas id="myChart" visibility="collapsed"></canvas>
             </div>
           </div>
         </div>
