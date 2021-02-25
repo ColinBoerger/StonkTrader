@@ -1,6 +1,10 @@
 <html>
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<body>
+     <!-- HTML content -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="/static/js/getSubData.js"></script>
+</body>
 <body onload="getSupportedSubs();getLastUpdate();">
   <head>
     <title>Stonk Scraper</title>
@@ -44,9 +48,12 @@
 
              <h4>Trend of a ticker over time(Top):</h4> // <div id="Time Since"><h4>(XX minutes ago)</h4></div>
             <div class="card-body">
-                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="alert();">Enter</button>
+                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="getTickerOverTime();">Enter</button>
             </div>      
             <div class="card-body" id="Stock Trend">
+              <div class="container">
+                <canvas id="myChart" width="600" height="400"></canvas>
+              </div>
              Choose a stock to look at overtime (Note)
              //https://wp-dd.com/how-to-create-a-javascript-chart-with-chart-js/        
             </div>
@@ -68,5 +75,6 @@
           </div>
         </div>
     </div>
+
   </body>
 </html>

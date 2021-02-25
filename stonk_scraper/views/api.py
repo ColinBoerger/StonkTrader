@@ -83,29 +83,30 @@ def api_stock(ticker, method='GET'):
     return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/stock/<ticker>/time/<timeInSeconds>")
-def api_stock(ticker, timeInSeconds method='GET'):
+def api_stock_time(ticker, timeInSeconds, method='GET'):
     to_ret = {}
     ticker = ticker.upper()
-    
+    UTC = pytz.utc 
+    time_offset_seconds = 0
+    try:
+        time_offset_seconds = int(timeInSeconds)
+    except Exception as e:
+        return "Finish Me"
+    curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
+
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
-    cursor.execute("SELECT m.numMentions, m.ticker, st.companyName from stocks as st, mentions as m where m.ticker = ? and m.ticker = st.ticker and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "HOT"])
-    res = cursor.fetchone()
+    cursor.execute("SELECT m.numMentions, m.scan, s.created from mentions as m, scans as s where m.ticker = ? and m.scan = s.scanId and m.scan in (Select scanId from scans where type=? and created >= ?) ORDER by m.scan DESC", [ticker, "TOP",curr_time])
+    res = cursor.fetchall()
+    print(res)
     if res == None:
         to_ret[ticker + "hot"] = 0
         to_ret["name"] = "Not supported"
         to_ret[ticker + "top"] = "Not supported"
         #database.close()
         return flask.jsonify(to_ret)
-    
-    to_ret[ticker + "hot"] = res["numMentions"]
-    to_ret["name"] = res["companyName"]
-    cursor = database.cursor()
-    
-    cursor.execute("SELECT m.numMentions, m.ticker, st.companyName from stocks as st, mentions as m where m.ticker = ? and m.ticker = st.ticker and m.scan in (Select scanId from scans where type=? ORDER BY created DESC limit 1)", [ticker, "TOP"])
-    res = cursor.fetchone()
-    to_ret[ticker + "top"] = res["numMentions"]
-    #database.close()
+    to_ret = {}
+    to_ret["data"] = res
     return flask.jsonify(to_ret)
 
 @stonk_scraper.app.route("/stock/supportedSubs/")
@@ -142,7 +143,10 @@ def api_sub_data(subName, method='GET'):
     to_ret["data"] = data
     ##database.close()
     return flask.jsonify(to_ret)
+'''
+Funtions below 
 
+'''
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>")
 def api_sub_time_data(subName,timeInSeconds, method='GET'):
     #TODO: Returns the data mentions from the stream
@@ -217,7 +221,7 @@ def api_hot_sub_time_data(subName,timeInSeconds, method='GET'):
     return flask.jsonify(results)
 
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>/top")
-def api_hot_sub_time_data(subName,timeInSeconds, method='GET'):
+def api_top_sub_time_data(subName,timeInSeconds, method='GET'):
     #TODO: Returns the data mentions from the stream
     UTC = pytz.utc 
     time_offset_seconds = 0
