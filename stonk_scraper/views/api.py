@@ -147,8 +147,7 @@ def api_sub_data(subName, method='GET'):
     ##database.close()
     return flask.jsonify(to_ret)
 '''
-Funtions below 
-
+Funtions below does it based on streams
 '''
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>")
 def api_sub_time_data(subName,timeInSeconds, method='GET'):

@@ -15,8 +15,10 @@ function getSupportedSubs(){
 function getTickerOverTime(){
     var e = document.getElementById("InputBox");
     var strTicker = e.value;
-
-    let promise = fetch("/stock/" + strTicker + "/time/90400")
+    var e = document.getElementById("mentionGraphTime");
+    var days = e.value;
+    var secs = days*60*60*24;
+    let promise = fetch("/stock/" + strTicker + "/time/" + secs)
     promise.then(response =>{
         response.json().then(data =>{
             let mentions = []
@@ -50,14 +52,20 @@ function getTickerOverTime(){
                 // Configuration options go here
                 options: {        
                     scales: {
-                        y: {
-                            beginAtZero: true
+                       yAxes: [{
+                            ticks: {
+                                beginAtZero: true
                             }
+                        }]
                     }
                 }
-        });
+            });
         })
     })
+}
+
+function getSubOverTimeStream(){
+    alert("implement me")
 }
 
 function getLastUpdate(){
@@ -65,6 +73,7 @@ function getLastUpdate(){
         promise.then(response => {
                 response.json().then(data =>{
                     document.getElementById("Time Since").innerHTML = "(" + data["timeInMinutes"] +" minutes ago)";
+                    document.getElementById("Time Since2").innerHTML = "(" + data["timeInMinutes"] +" minutes ago)";
                     document.getElementById("Time Since1").innerHTML = "(" + data["timeInMinutes"] +" minutes ago)";
                 })
             }
@@ -89,7 +98,7 @@ function getSubData(){
                     for(let i = 0; i < subs.length; i++){
                         document.getElementById("Stock Results").innerHTML = 
                             document.getElementById("Stock Results").innerHTML + "<br>" + (i+1)
-                            + ". " + subs[i][0] + " " + subs[i][1] + " " + subs[i][2];
+                            + ". <a href=\"/stock/" + subs[i][0] +"/page\">"+ subs[i][0] + "</a> " + subs[i][1] + " " + subs[i][2];
                     }
                     console.log(document.getElementById("Stock Results").innerHTML);
                 })

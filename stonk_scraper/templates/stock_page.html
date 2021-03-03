@@ -1,13 +1,13 @@
 <html>
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <script src="/static/js/getStocks.js"></script>
-  
+  <script src="/static/js/getStockPage.js"></script>
+  <!--@TODO edit this to be all relevant data about a stock -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <head>
     <title>Stonk Scraper</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   </head>
-  <body>
+  <body onload=getIndividualTicker("{{ticker}}")>
     <div class="container" id="start">
       <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -18,12 +18,12 @@
                 <a href="/custom_searches">Custom Searches</a>
                 <a href="/">Github</a>
             </div>     
-                Look Up individual stock ticker mentions            
+                            
             </div>  
         <div class="col-md-8">
           <div class="card">
             <div class="card-body">
-              <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="getTickerSubData();getIndividualTicker();">Enter</button>
+              FINISH ME
             </div>      
             <div class="card-body" id="Stock Results">
                        
@@ -38,7 +38,7 @@
             <!-- TradingView Widget BEGIN -->
             <div id="tradingViewTitle"></div>
           <div class="tradingview-widget-container" >
-            <div id="tradingview_874ba"></div>
+            <div id="tradingview_874ba" ></div>
               <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com" rel="noopener" target="_blank"><span class="blue-text">Charts by TradingView</span></a>
               </div>
               <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>

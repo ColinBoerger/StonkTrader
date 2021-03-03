@@ -1,14 +1,15 @@
 function getIndividualTicker(){
 	var ticker = document.getElementById("InputBox").value;
-	var elementWidth = document.getElementById("Stock Results").clientWidth
+	var elementWidth = document.getElementById("chartDiv").clientWidth
 	if(ticker === null || ticker === "" ){
 		console.log("empty")
 		return
 	}
+	document.getElementById("tradingViewTitle").innerHTML = "<h2>" + ticker + " price chart";
 	new TradingView.widget(
                 {
                   "width": elementWidth,
-                  "height": 610,
+                  "height": document.getElementById("chartDiv").clientHeight,
                   "symbol": ticker,
                   "interval": "H",
                   "timezone": "Etc/UTC",
@@ -41,23 +42,20 @@ function getTickerSubData(){
 	let promise = fetch("stock/" + ticker + "/subs")
 	promise.then(response => {
 			response.json().then(data =>{
-				document.getElementById("Stock Results Subs").innerHTML = " Mentions by Sub: <br>Top: <br>"
 				var topMentions = [];
 				var topSubs = [];
 				for(var i = 0; i < data["top"].length ; i++){
 					let res = data["top"][i];
-					document.getElementById("Stock Results Subs").innerHTML += res[0] + " " + res[1] + "<br>"
 					topSubs.push(res[0]);;
 					topMentions.push(res[1]);
 				}		
-				document.getElementById("Stock Results Subs").innerHTML += "Hot: <br>"
+				document.getElementById("Stock Results Subs").innerHTML += "<h2>"  + ticker + " mentions chart by sub</h2>"
 				
 
 				var mentions = [];
 				var subs = [];
 				for(var i = 0; i < data["hot"].length ; i++){
 					let res = data["hot"][i];
-					document.getElementById("Stock Results Subs").innerHTML += res[0] + " " + res[1] + "<br>"
 					subs.push(res[0]);;
 					mentions.push(res[1]);
 				}

@@ -48,11 +48,36 @@
 
              <h4>Trend of a ticker over time(Top):</h4><div id="Time Since1"><h4>(XX minutes ago)</h4></div>
             <div class="card-body">
-                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"> <button onclick="getTickerOverTime();">Enter</button>
+                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"></input> 
+                <select id="mentionGraphTime">
+                  <option value=0>Choose a time frame</option>
+                  <option value=1>1 day</option>
+                  <option value=7>7 days</option>
+                  <option value=30>30 days</option>
+                </select> 
+                <button onclick="getTickerOverTime();">Enter</button>
             </div>      
             <div class="card-body" id="Stock Trend">
               
                 <canvas id="myChart" visibility="collapsed"></canvas>
+            </div>
+          </div>
+          <div class="card">
+
+             <h4>Trend of a sub over time(Stream):</h4><div id="Time Since2"><h4>(XX minutes ago)</h4></div>
+            <div class="card-body">
+                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"></input> 
+                <select id="mentionGraphTimeHot">
+                  <option value=0>Choose a time frame</option>
+                  <option value=1>1 day</option>
+                  <option value=7>7 days</option>
+                  <option value=30>30 days</option>
+                </select> 
+                <button onclick="getSubOverTimeStream();">Enter</button>
+            </div>      
+            <div class="card-body" id="Stock TrendHot">
+              
+                <canvas id="myChartHot" visibility="collapsed"></canvas>
             </div>
           </div>
         </div>

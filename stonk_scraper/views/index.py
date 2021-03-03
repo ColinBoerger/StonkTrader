@@ -43,6 +43,7 @@ def show_custom_searches():
 
 
 @stonk_scraper.app.route('/stock/<ticker>/page', methods=['GET'])
-def show_stock_page():
-
-    return "Implement me"
+def show_stock_page(ticker):
+    context = {}
+    context["ticker"] = ticker
+    return flask.render_template("stock_page.html", **context)
