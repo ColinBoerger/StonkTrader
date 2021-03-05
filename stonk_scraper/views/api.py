@@ -171,18 +171,20 @@ def api_sub_time_data(subName,timeInSeconds, method='GET'):
     #print(subName)
     mentions = cursor.execute("SELECT * from mentions where subReddit=? and scan in (SELECT scanId from scans where type=? AND created >= ?)",[subName,"STREAM", curr_time])
     mentions = mentions.fetchall()
-    print(mentions)
     results = {}
     for mention in mentions:
         scan = mention["scan"]
         ticker = mention["ticker"] 
         numMentions = mention["numMentions"]
         if scan not in results.keys():
-            results[scan] = {}
+            results[scan] = []
         if numMentions != 0:
-            results[scan][ticker] = numMentions
+            results[scan] += [[ticker, numMentions]]
         #TODO: Add a timestamp for the scan
-    #database.close()
+    for scan in results.keys():
+        results[scan].sort(key = lambda x: x[1])
+        results[scan].reverse()
+        results[scan] = results[scan][:10]
     return flask.jsonify(results)
 
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>/hot")
@@ -208,18 +210,21 @@ def api_hot_sub_time_data(subName,timeInSeconds, method='GET'):
     #print(subName)
     mentions = cursor.execute("SELECT * from mentions where subReddit=? and scan in (SELECT scanId from scans where type=? AND created >= ?)",[subName,"MULTI-HOT", curr_time])
     mentions = mentions.fetchall()
-    print(mentions)
     results = {}
     for mention in mentions:
         scan = mention["scan"]
         ticker = mention["ticker"] 
         numMentions = mention["numMentions"]
         if scan not in results.keys():
-            results[scan] = {}
+            results[scan] = []
         if numMentions != 0:
-            results[scan][ticker] = numMentions
+            results[scan] += [[ticker, numMentions]]
         #TODO: Add a timestamp for the scan
-    #database.close()
+    for scan in results.keys():
+        results[scan].sort(key = lambda x: x[1])
+        results[scan].reverse()
+        results[scan] = results[scan][:10]
+
     return flask.jsonify(results)
 
 @stonk_scraper.app.route("/subs/<subName>/time/<timeInSeconds>/top")
@@ -252,9 +257,13 @@ def api_top_sub_time_data(subName,timeInSeconds, method='GET'):
         ticker = mention["ticker"] 
         numMentions = mention["numMentions"]
         if scan not in results.keys():
-            results[scan] = {}
+            results[scan] = []
         if numMentions != 0:
-            results[scan][ticker] = numMentions
+            results[scan] += [[ticker, numMentions]]
         #TODO: Add a timestamp for the scan
-    #database.close()
+    for scan in results.keys():
+        results[scan].sort(key = lambda x: x[1])
+        results[scan].reverse()
+        results[scan] = results[scan][:10]
+
     return flask.jsonify(results)

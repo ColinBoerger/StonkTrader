@@ -66,18 +66,20 @@
 
              <h4>Trend of a sub over time(Stream):</h4><div id="Time Since2"><h4>(XX minutes ago)</h4></div>
             <div class="card-body">
-                <input type="text" id="InputBox" placeholder="Enter stock ticker EX. AAPL"></input> 
-                <select id="mentionGraphTimeHot">
+                <select id="mentionGraphTimeStream">
                   <option value=0>Choose a time frame</option>
                   <option value=1>1 day</option>
                   <option value=7>7 days</option>
                   <option value=30>30 days</option>
+                </select>
+                <select id="selectBarStream">
+                  <option value="0">Select SubReddit:</option>
                 </select> 
                 <button onclick="getSubOverTimeStream();">Enter</button>
             </div>      
-            <div class="card-body" id="Stock TrendHot">
+            <div class="card-body" id="StockTrendStream">
               
-                <canvas id="myChartHot" visibility="collapsed"></canvas>
+                
             </div>
           </div>
         </div>

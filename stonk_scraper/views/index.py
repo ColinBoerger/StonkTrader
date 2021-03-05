@@ -47,3 +47,9 @@ def show_stock_page(ticker):
     context = {}
     context["ticker"] = ticker
     return flask.render_template("stock_page.html", **context)
+
+@stonk_scraper.app.route('/scan/<number>/page', methods=['GET'])
+def show_stock_page(number):
+    return "Implement me"
+    #context = {}
+    #return flask.render_template("scan_page.html", **context)

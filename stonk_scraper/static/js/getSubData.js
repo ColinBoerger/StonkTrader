@@ -4,6 +4,8 @@ function getSupportedSubs(){
                 response.json().then(data =>{
                     var subs = data["supportedSubs"];
                     for(let i = 0; i < subs.length; i++){
+                        document.getElementById("selectBarStream").innerHTML = document.getElementById("selectBarStream").innerHTML +
+                         "<option value=" + subs[i] + ">" +subs[i] + "</option>"; 
                         document.getElementById("selectBar").innerHTML = document.getElementById("selectBar").innerHTML +
                          "<option value=" + subs[i] + ">" +subs[i] + "</option>"; 
                     }
@@ -65,7 +67,33 @@ function getTickerOverTime(){
 }
 
 function getSubOverTimeStream(){
-    alert("implement me")
+    //alert("implement me")
+    //TODO: Implement this visually to not look as bad 
+    var time = document.getElementById("mentionGraphTimeStream").value*60*60*24;
+    var sub = document.getElementById("selectBarStream").value;
+    if(sub === "0"){
+        alert("Implement error handling")
+    }
+    if(time === "0"){
+        alert("Implement error handling")        
+    }
+    console.log(time);
+    console.log(sub);
+    var url = "/subs/" + sub + "/time/" + time;
+    let promise = fetch(url)
+    promise.then(response => {
+        response.json().then(data => {
+            document.getElementById("StockTrendStream").innerHTML = "";
+            for(var key in data){
+                console.log(key)
+                document.getElementById("StockTrendStream").innerHTML += "Scan " + key + "<br>"; 
+                for (var i = 0; i < data[key].length; i ++){
+                    document.getElementById("StockTrendStream").innerHTML += (i+1) + "." + data[key][i][0] + " " + data[key][i][1] + "<br>"; 
+                }
+            }
+        })
+    })
+
 }
 
 function getLastUpdate(){
