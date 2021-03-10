@@ -85,6 +85,18 @@ def api_stock(ticker, method='GET'):
     #database.close()
     return flask.jsonify(to_ret)
 
+@stonk_scraper.app.route("/stock/subs/<ticker>/")
+def api_stock_sub(ticker, method='GET'):
+    print("HERE")
+    to_ret = {}
+    ticker = ticker.upper()
+    database = stonk_scraper.model.get_db()
+    cursor = database.cursor()
+    cursor.execute("SELECT m.numMentions, m.ticker, m.scan, m.subReddit from stocks as st, mentions as m where m.ticker = ? and m.ticker = st.ticker and m.scan in (Select scanId from scans where type=? ORDER BY created DESC)", [ticker, "MULTI-TOP"])
+    res = cursor.fetchall()
+    to_ret['results'] = res
+    return flask.jsonify(to_ret)
+
 @stonk_scraper.app.route("/stock/<ticker>/time/<timeInSeconds>")
 def api_stock_time(ticker, timeInSeconds, method='GET'):
     to_ret = {}
