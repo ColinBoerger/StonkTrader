@@ -1,0 +1,4 @@
+TODO Before release:
+	1. Create a way to download the database
+	2. Clean up formatting and error checking
+	3. Make sure to sanitize input

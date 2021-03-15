@@ -3,38 +3,17 @@ import stonk_scraper
 import csv
 import os
 import time
-'''
-global stock_data_hot
-global stock_lookup_hot
+import zipfile
 
-global stock_data_top
-global stock_lookup_top
-
-global stock_lookup_subs
-
-global time_at_last_update
-global stream_data
-global names
-'''
-
-names = {}
-stock_data_hot = []
-
-stock_lookup_hot = {}
-
-
-stock_data_top = []
-
-stock_lookup_top = {}
-
-
-stock_lookup_subs = {}
-
-time_at_last_update = 0
-
-stream_data = {}
-print("Recalled")
 
 def zip_stock_data():
-	print("WEEEEE")
+	filename = "stonk_scraper/static/database.zip"
+	statbuf = os.stat(filename)
+	timeEdited = statbuf.st_mtime
+	print((time.time() - timeEdited) )
+	if (time.time() - timeEdited) > 60*1:
+		print("Here")
+		my_zipfile = zipfile.ZipFile("stonk_scraper/static/database.zip", mode='w', compression=zipfile.ZIP_DEFLATED)
+		my_zipfile.write('test1.db')
+		my_zipfile.close()
 

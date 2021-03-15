@@ -48,6 +48,21 @@ def show_stock_page(ticker):
     context["ticker"] = ticker
     return flask.render_template("stock_page.html", **context)
 
+
+@stonk_scraper.app.route('/download/', methods=['GET'])
+def download_page():
+    context = {}
+    return flask.render_template("download_data.html", **context)
+
+@stonk_scraper.app.route('/download/data/', methods=['GET'])
+def download_db():
+    zip_stock_data()
+    try:
+        return flask.send_file('static/database.zip', as_attachment=True), 200
+    except Exception as e:
+        print(e)
+        return "error", 404
+
 @stonk_scraper.app.route('/scan/<number>/page', methods=['GET'])
 def show_scan_page(number):
     return "Implement me"
