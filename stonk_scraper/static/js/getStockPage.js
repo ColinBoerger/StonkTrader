@@ -25,7 +25,7 @@ function getIndividualTicker(tickerInput){
 	let promise = fetch("/stock/" + ticker);
 	promise.then(response => {
 			response.json().then(data =>{
-				document.getElementById("Stock Results").innerHTML = data["name"] + "<br>" 
+				document.getElementById("Stock Results").innerHTML = "<a href=\'/stock/"  + ticker + "/page\''> "+ tickerInput + "</a>: " + data["name"] + "<br>" 
 				document.getElementById("Stock Results").innerHTML += "Top Mentions - " + ticker + ": "	+ data[ticker + "top"] + "<br>";		
 				document.getElementById("Stock Results").innerHTML += "Hot Mentions- " + ticker + ": "	+ data[ticker + "hot"];		
 			})

@@ -60,7 +60,6 @@ def download_db():
     try:
         return flask.send_file('static/database.zip', as_attachment=True), 200
     except Exception as e:
-        print(e)
         return "error", 404
 
 @stonk_scraper.app.route('/scan/<number>/page', methods=['GET'])

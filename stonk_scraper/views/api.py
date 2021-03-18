@@ -87,7 +87,6 @@ def api_stock(ticker, method='GET'):
 
 @stonk_scraper.app.route("/stock/subs/<ticker>/")
 def api_stock_sub(ticker, method='GET'):
-    print("HERE")
     to_ret = {}
     ticker = ticker.upper()
     database = stonk_scraper.model.get_db()
@@ -106,14 +105,14 @@ def api_stock_time(ticker, timeInSeconds, method='GET'):
     try:
         time_offset_seconds = int(timeInSeconds)
     except Exception as e:
-        return "Finish Me"
+        to_ret["data"] = []
+        return flask.jsonify(to_ret)
     curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
     cursor.execute("SELECT m.numMentions, m.scan, s.created from mentions as m, scans as s where m.ticker = ? and m.scan = s.scanId and m.scan in (Select scanId from scans where type=? and created >= ?) ORDER by m.scan", [ticker, "TOP",curr_time])
     res = cursor.fetchall()
-    print(res)
     if res == None:
         to_ret[ticker + "hot"] = 0
         to_ret["name"] = "Not supported"
@@ -169,9 +168,10 @@ def api_sub_time_data(subName,timeInSeconds, method='GET'):
     try:
         time_offset_seconds = int(timeInSeconds)
     except Exception as e:
-        return "Finish Me"
+        to_ret = {}
+        return flask.jsonify(to_ret)
     curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
-    print(curr_time)
+   
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
@@ -207,9 +207,10 @@ def api_hot_sub_time_data(subName,timeInSeconds, method='GET'):
     try:
         time_offset_seconds = int(timeInSeconds)
     except Exception as e:
-        return "Finish Me"
+        to_ret = {}
+        return flask.jsonify(to_ret)
     curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
-    print(curr_time)
+    
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
@@ -247,9 +248,9 @@ def api_top_sub_time_data(subName,timeInSeconds, method='GET'):
     try:
         time_offset_seconds = int(timeInSeconds)
     except Exception as e:
-        return "Finish Me"
+        to_ret = {}
+        return flask.jsonify(to_ret)
     curr_time = datetime.now(UTC) - timedelta(seconds=int(timeInSeconds))
-    print(curr_time)
 
     database = stonk_scraper.model.get_db()
     cursor = database.cursor()
@@ -258,11 +259,8 @@ def api_top_sub_time_data(subName,timeInSeconds, method='GET'):
 
     res1 = cursor.execute("SELECT *  from scans  where type=? AND created >= ?",["STREAM",curr_time])
     res = res1.fetchall()
-    #print(res)
-    #print(subName)
     mentions = cursor.execute("SELECT * from mentions where subReddit=? and scan in (SELECT scanId from scans where type=? AND created >= ?)",[subName,"MULTI-TOP", curr_time])
     mentions = mentions.fetchall()
-    print(mentions)
     results = {}
     for mention in mentions:
         scan = mention["scan"]

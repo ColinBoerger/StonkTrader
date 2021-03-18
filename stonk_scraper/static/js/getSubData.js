@@ -72,10 +72,12 @@ function getSubOverTimeStream(){
     var time = document.getElementById("mentionGraphTimeStream").value*60*60*24;
     var sub = document.getElementById("selectBarStream").value;
     if(sub === "0"){
-        alert("Implement error handling")
+        alert("Please enter sub");
+        return;
     }
     if(time === "0"){
-        alert("Implement error handling")        
+        alert("Please enter a time");
+        return;        
     }
     console.log(time);
     console.log(sub);
@@ -83,6 +85,11 @@ function getSubOverTimeStream(){
     let promise = fetch(url)
     promise.then(response => {
         response.json().then(data => {
+            console.log(Object.keys(data).length)
+            if(Object.keys(data).length === 0){
+              document.getElementById("StockTrendStream").innerHTML = "No data present";  
+              return;
+            }
             document.getElementById("StockTrendStream").innerHTML = "";
             for(var key in data){
                 console.log(key)

@@ -25,7 +25,7 @@ function getIndividualTicker(){
 	let promise = fetch("stock/" + ticker)
 	promise.then(response => {
 			response.json().then(data =>{
-				document.getElementById("Stock Results").innerHTML = data["name"] + "<br>" 
+				document.getElementById("Stock Results").innerHTML = "<a href=\'/stock/"  + ticker + "/page\''> "+ ticker + "</a>: " + data["name"] + "<br>" 
 				document.getElementById("Stock Results").innerHTML += "Top Mentions - " + ticker + ": "	+ data[ticker + "top"] + "<br>";		
 				document.getElementById("Stock Results").innerHTML += "Hot Mentions- " + ticker + ": "	+ data[ticker + "hot"];		
 			})
@@ -49,7 +49,7 @@ function getTickerSubData(){
 					topSubs.push(res[0]);;
 					topMentions.push(res[1]);
 				}		
-				document.getElementById("Stock Results Subs").innerHTML += "<h2>"  + ticker + " mentions chart by sub</h2>"
+				document.getElementById("Stock Results Subs").innerHTML = "<h2>"  + ticker + " mentions chart by sub</h2>"
 				
 
 				var mentions = [];
